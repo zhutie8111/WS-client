@@ -1,0 +1,9 @@
+# git ignore files
+
+#IDEA 
+*.iml
+.idea/
+
+# Build targets
+/target
+*/target
