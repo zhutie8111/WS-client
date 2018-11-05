@@ -3,7 +3,7 @@ package cn.com.tcsl.ws;
 import java.util.Map;
 
 /**
- * Created by Administrator on 2018/11/3.
+ * Created by Tony on 2018/11/3.
  */
 public class WebsocketConfig {
 

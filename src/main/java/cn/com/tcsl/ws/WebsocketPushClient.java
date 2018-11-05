@@ -13,7 +13,9 @@ import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
 import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.ssl.SslContext;
+import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
 import java.io.BufferedReader;
@@ -28,6 +30,10 @@ public class WebsocketPushClient {
 
     private String url;
 
+    private int httpMaxContentLength = 8192;
+
+    private WebsocketConfig websocketConfig;
+
 
     //static final String URL = System.getProperty("url", "ws://192.168.9.215:9001/websocket?shopId=325");
 
@@ -35,11 +41,13 @@ public class WebsocketPushClient {
 
     public WebsocketPushClient(WebsocketConfig config){
 
-        url = config.getScheme() + "://" + config.getHost()+":" + config.getPort() + "/"
-                + config.getPath();
+        websocketConfig = config;
 
-        if (config.getSuffixParams() != null && !config.getSuffixParams().isEmpty()){
-            Map<String, Object> params = config.getSuffixParams();
+        url = websocketConfig.getScheme() + "://" + websocketConfig.getHost()+":" + websocketConfig.getPort() + "/"
+                + websocketConfig.getPath();
+
+        if (websocketConfig.getSuffixParams() != null && !websocketConfig.getSuffixParams().isEmpty()){
+            Map<String, Object> params = websocketConfig.getSuffixParams();
             StringBuilder paramsBuilder = new StringBuilder();
             for (String key : params.keySet()){
                 paramsBuilder.append(key);
@@ -55,7 +63,7 @@ public class WebsocketPushClient {
 
     }
 
-    public void init() throws Exception{
+    public void connect() throws Exception{
         {
             URI uri = new URI(url);
             String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
@@ -82,8 +90,8 @@ public class WebsocketPushClient {
             final boolean ssl = "wss".equalsIgnoreCase(scheme);
             final SslContext sslCtx;
             if (ssl) {
-                // sslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE);
+                 sslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
+                //sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE); //for 4.0.* version
             } else {
                 sslCtx = null;
             }
@@ -111,8 +119,8 @@ public class WebsocketPushClient {
                                 }
                                 p.addLast(
                                         new HttpClientCodec(),
-                                        new HttpObjectAggregator(8192),
-                                        //WebSocketClientCompressionHandler.INSTANCE,
+                                        new HttpObjectAggregator(httpMaxContentLength),
+                                        WebSocketClientCompressionHandler.INSTANCE,
                                         handler);
                             }
                         });
@@ -144,5 +152,7 @@ public class WebsocketPushClient {
 
     }
 
-
+    public void setWebsocketConfig(WebsocketConfig websocketConfig) {
+        this.websocketConfig = websocketConfig;
+    }
 }

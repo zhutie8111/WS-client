@@ -5,10 +5,8 @@ import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
 
-import java.util.Date;
-
 /**
- * Created by Administrator on 2018/11/3.
+ * Created by Tony on 2018/11/3.
  */
 public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Object> {
 
@@ -71,7 +69,7 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
             ch.close();
         }else if(frame instanceof  BinaryWebSocketFrame){
             BinaryWebSocketFrame binaryFrame = (BinaryWebSocketFrame)msg;
-            System.out.println(new Date());
+            byte [] bytes = binaryFrame.content().array();
         }
     }
 

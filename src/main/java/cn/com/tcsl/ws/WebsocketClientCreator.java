@@ -9,6 +9,18 @@ public class WebsocketClientCreator {
 
     private WebsocketPushClient websocketPushClient;
 
+    public WebsocketClientCreator (WebsocketConfig config, WebsocketPushClient client){
+        this.websocketConfig = config;
+        this.websocketPushClient = client;
 
+        websocketPushClient.setWebsocketConfig(websocketConfig);
+
+        try {
+            websocketPushClient.connect();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
 
 }
