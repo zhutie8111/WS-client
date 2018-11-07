@@ -1,7 +1,6 @@
 package cn.com.tcsl.ws;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -12,14 +11,13 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.handler.codec.http.DefaultHttpHeaders;
 import io.netty.handler.codec.http.HttpClientCodec;
 import io.netty.handler.codec.http.HttpObjectAggregator;
-import io.netty.handler.codec.http.websocketx.*;
+import io.netty.handler.codec.http.websocketx.WebSocketClientHandshakerFactory;
+import io.netty.handler.codec.http.websocketx.WebSocketVersion;
 import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketClientCompressionHandler;
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
 import java.net.URI;
 import java.util.Map;
 
@@ -34,37 +32,29 @@ public class WebsocketPushClient {
 
     private WebsocketConfig websocketConfig;
 
+    private PushMessage pushMessage;
+
+    private Channel channel;
+
 
     //static final String URL = System.getProperty("url", "ws://192.168.9.215:9001/websocket?shopId=325");
 
-    private WebsocketPushClient(){}
-
     public WebsocketPushClient(WebsocketConfig config){
+        pushMessage = new PushMessage(){
+
+        };
+    }
+
+    public WebsocketPushClient(WebsocketConfig config, PushMessage pushMessage){
 
         websocketConfig = config;
 
-        url = websocketConfig.getScheme() + "://" + websocketConfig.getHost()+":" + websocketConfig.getPort() + "/"
-                + websocketConfig.getPath();
-
-        if (websocketConfig.getSuffixParams() != null && !websocketConfig.getSuffixParams().isEmpty()){
-            Map<String, Object> params = websocketConfig.getSuffixParams();
-            StringBuilder paramsBuilder = new StringBuilder();
-            for (String key : params.keySet()){
-                paramsBuilder.append(key);
-                paramsBuilder.append("=");
-                paramsBuilder.append(params.get(key));
-                paramsBuilder.append("&");
-            }
-            if (paramsBuilder.length() > 0){
-                paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
-            }
-            url = url + "?" + paramsBuilder.toString();
-        }
-
+        this.pushMessage = pushMessage;
     }
 
     public void connect() throws Exception{
         {
+            getUrl();
             URI uri = new URI(url);
             String scheme = uri.getScheme() == null? "ws" : uri.getScheme();
             final String host = uri.getHost() == null? "127.0.0.1" : uri.getHost();
@@ -104,7 +94,7 @@ public class WebsocketPushClient {
                 final WebsocketPushClientHandler handler =
                         new WebsocketPushClientHandler(
                                 WebSocketClientHandshakerFactory.newHandshaker(
-                                        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()));
+                                        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), pushMessage);
 
                 Bootstrap b = new Bootstrap();
                 b.group(group)
@@ -125,10 +115,13 @@ public class WebsocketPushClient {
                             }
                         });
 
+                //连接服务器
                 Channel ch = b.connect(uri.getHost(), port).sync().channel();
+                channel = ch;
                 handler.handshakeFuture().sync();
+                ch.closeFuture().sync();
 
-                BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
+                /*BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
                 while (true) {
                     String msg = console.readLine();
                     if (msg == null) {
@@ -144,7 +137,8 @@ public class WebsocketPushClient {
                         WebSocketFrame frame = new TextWebSocketFrame(msg);
                         ch.writeAndFlush(frame);
                     }
-                }
+                }*/
+
             } finally {
                 group.shutdownGracefully();
             }
@@ -152,7 +146,37 @@ public class WebsocketPushClient {
 
     }
 
+    private void getUrl(){
+
+        url = websocketConfig.getScheme() + "://" + websocketConfig.getHost()+":" + websocketConfig.getPort() + "/"
+                + websocketConfig.getPath();
+
+        if (websocketConfig.getSuffixParams() != null && !websocketConfig.getSuffixParams().isEmpty()){
+            Map<String, Object> params = websocketConfig.getSuffixParams();
+            StringBuilder paramsBuilder = new StringBuilder();
+            for (String key : params.keySet()){
+                paramsBuilder.append(key);
+                paramsBuilder.append("=");
+                paramsBuilder.append(params.get(key));
+                paramsBuilder.append("&");
+            }
+            if (paramsBuilder.length() > 0){
+                paramsBuilder.deleteCharAt(paramsBuilder.length() - 1);
+            }
+            url = url + "?" + paramsBuilder.toString();
+        }
+
+    }
+
     public void setWebsocketConfig(WebsocketConfig websocketConfig) {
         this.websocketConfig = websocketConfig;
+    }
+
+    public void setPushMessage(PushMessage pushMessage) {
+        this.pushMessage = pushMessage;
+    }
+
+    public Channel getChannel() {
+        return channel;
     }
 }

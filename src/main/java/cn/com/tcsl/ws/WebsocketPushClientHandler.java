@@ -1,5 +1,6 @@
 package cn.com.tcsl.ws;
 
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.*;
 import io.netty.handler.codec.http.FullHttpResponse;
 import io.netty.handler.codec.http.websocketx.*;
@@ -13,8 +14,15 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
 
+    private PushMessage pushMessage;
+
     public WebsocketPushClientHandler(WebSocketClientHandshaker handshaker) {
         this.handshaker = handshaker;
+    }
+
+    public WebsocketPushClientHandler(WebSocketClientHandshaker handshaker, PushMessage pushMessage) {
+        this.handshaker = handshaker;
+        this.pushMessage = pushMessage;
     }
 
     public ChannelFuture handshakeFuture() {
@@ -58,19 +66,45 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
                             ", content=" + response.content().toString(CharsetUtil.UTF_8) + ')');
         }
 
+
+
+
         WebSocketFrame frame = (WebSocketFrame) msg;
         if (frame instanceof TextWebSocketFrame) {
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             System.out.println("WebSocket Client received message: " + textFrame.text());
+
+            pushMessage.onMessage(ch, textFrame.text());
+
         } else if (frame instanceof PongWebSocketFrame) {
             System.out.println("WebSocket Client received pong");
+
+            pushMessage.onMessage(ch, frame);
+
         } else if (frame instanceof CloseWebSocketFrame) {
             System.out.println("WebSocket Client received closing");
+
+            pushMessage.onMessage(ch, frame);//执行后将关闭
+
             ch.close();
         }else if(frame instanceof  BinaryWebSocketFrame){
             BinaryWebSocketFrame binaryFrame = (BinaryWebSocketFrame)msg;
-            byte [] bytes = binaryFrame.content().array();
+
+            ByteBuf buf = binaryFrame.content();
+            int availableBytesNumber = buf.readableBytes();
+            byte[] receivedBytes = new byte[availableBytesNumber];
+            buf.readBytes(receivedBytes);
+
+            //buf.release();
+
+            // byte [] bytes = receivedBytes;
+
+            pushMessage.onMessage(ch, receivedBytes);//执行后将关闭
+
         }
+
+
+
     }
 
     @Override
