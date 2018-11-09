@@ -14,15 +14,15 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
     private final WebSocketClientHandshaker handshaker;
     private ChannelPromise handshakeFuture;
 
-    private PushMessage pushMessage;
+    private ReceiveMessage receiveMessage;
 
     public WebsocketPushClientHandler(WebSocketClientHandshaker handshaker) {
         this.handshaker = handshaker;
     }
 
-    public WebsocketPushClientHandler(WebSocketClientHandshaker handshaker, PushMessage pushMessage) {
+    public WebsocketPushClientHandler(WebSocketClientHandshaker handshaker, ReceiveMessage receiveMessage) {
         this.handshaker = handshaker;
-        this.pushMessage = pushMessage;
+        this.receiveMessage = receiveMessage;
     }
 
     public ChannelFuture handshakeFuture() {
@@ -74,17 +74,17 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
             TextWebSocketFrame textFrame = (TextWebSocketFrame) frame;
             System.out.println("WebSocket Client received message: " + textFrame.text());
 
-            pushMessage.onMessage(ch, textFrame.text());
+            receiveMessage.onMessage(ch, textFrame.text());
 
         } else if (frame instanceof PongWebSocketFrame) {
             System.out.println("WebSocket Client received pong");
 
-            pushMessage.onMessage(ch, frame);
+            receiveMessage.onMessage(ch, frame);
 
         } else if (frame instanceof CloseWebSocketFrame) {
             System.out.println("WebSocket Client received closing");
 
-            pushMessage.onMessage(ch, frame);//执行后将关闭
+            receiveMessage.onMessage(ch, frame);//执行后将关闭
 
             ch.close();
         }else if(frame instanceof  BinaryWebSocketFrame){
@@ -99,7 +99,7 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
 
             // byte [] bytes = receivedBytes;
 
-            pushMessage.onMessage(ch, receivedBytes);//执行后将关闭
+            receiveMessage.onMessage(ch, receivedBytes);//执行后将关闭
 
         }
 

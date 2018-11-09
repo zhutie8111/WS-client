@@ -32,24 +32,29 @@ public class WebsocketPushClient {
 
     private WebsocketConfig websocketConfig;
 
-    private PushMessage pushMessage;
+    private ReceiveMessage receiveMessage;
 
     private Channel channel;
+
+    private EventLoopGroup groupCopy ;
 
 
     //static final String URL = System.getProperty("url", "ws://192.168.9.215:9001/websocket?shopId=325");
 
     public WebsocketPushClient(WebsocketConfig config){
-        pushMessage = new PushMessage(){
+
+        websocketConfig = config;
+
+        receiveMessage = new ReceiveMessage(){
 
         };
     }
 
-    public WebsocketPushClient(WebsocketConfig config, PushMessage pushMessage){
+    public WebsocketPushClient(WebsocketConfig config, ReceiveMessage receiveMessage){
 
         websocketConfig = config;
 
-        this.pushMessage = pushMessage;
+        this.receiveMessage = receiveMessage;
     }
 
     public void connect() throws Exception{
@@ -94,7 +99,7 @@ public class WebsocketPushClient {
                 final WebsocketPushClientHandler handler =
                         new WebsocketPushClientHandler(
                                 WebSocketClientHandshakerFactory.newHandshaker(
-                                        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), pushMessage);
+                                        uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
                 Bootstrap b = new Bootstrap();
                 b.group(group)
@@ -119,7 +124,13 @@ public class WebsocketPushClient {
                 Channel ch = b.connect(uri.getHost(), port).sync().channel();
                 channel = ch;
                 handler.handshakeFuture().sync();
-                ch.closeFuture().sync();
+
+/*                synchronized(this){
+                    closeFlag.wait();
+                }*/
+
+
+                //ch.closeFuture().sync();
 
                 /*BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
                 while (true) {
@@ -140,7 +151,8 @@ public class WebsocketPushClient {
                 }*/
 
             } finally {
-                group.shutdownGracefully();
+               // group.shutdownGracefully();
+                groupCopy = group;
             }
         }
 
@@ -172,11 +184,16 @@ public class WebsocketPushClient {
         this.websocketConfig = websocketConfig;
     }
 
-    public void setPushMessage(PushMessage pushMessage) {
-        this.pushMessage = pushMessage;
+    public void setReceiveMessage(ReceiveMessage receiveMessage) {
+        this.receiveMessage = receiveMessage;
     }
 
     public Channel getChannel() {
         return channel;
+    }
+
+    public EventLoopGroup getGroupCopy(){
+        return groupCopy;
+
     }
 }

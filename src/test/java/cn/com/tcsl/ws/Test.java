@@ -7,6 +7,7 @@ import java.io.UnsupportedEncodingException;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Demo
@@ -15,22 +16,25 @@ import java.util.Map;
 
 public class Test {
 
+    private WebsocketConfig config;
+
+    private WebsocketClientInstance creator;
 
     public static void main(String args[]){
+        Test t = new Test();
 
-       /* String url = "ws://192.168.9.215:9001/websocket?shopId=325";
-        try{
-            URI uri = new URI(url);
-            System.out.println(uri.getPort());
-            System.out.println(uri.getScheme());
-            System.out.println(uri.getHost());
-        }catch (Exception e){
+        t.before();
+        t.test1();
+        try {
+            TimeUnit.SECONDS.sleep(1);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        t.close();
+    }
 
-        }*/
-
-        Test test = new Test();
-
-        WebsocketConfig config = new WebsocketConfig();
+    public void before(){
+        config = new WebsocketConfig();
         config.setHost("192.168.9.215");
         config.setPort(9001);
         config.setPath("websocket");
@@ -38,31 +42,11 @@ public class Test {
         params.put("shopId", 318);
 
         config.setSuffixParams(params);
-
-        for (int i = 0 ;i <1000; i++){
-            config.getSuffixParams().put("shopId", 318+i);
-            Thread t = new Thread(new clientThread(test, config));
-            t.start();
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-
-
-
-
-
-
-
     }
 
 
-    private void wsclient(WebsocketConfig config){
-
-
-        WebsocketClientCreator creator = new WebsocketClientCreator(new WebsocketPushClient(config, new PushMessage(){
+    public void test1(){
+        creator = new WebsocketClientInstance(new WebsocketPushClient(config, new ReceiveMessage(){
 
 
             public void onMessage(Channel channel, byte[] bytes){
@@ -70,31 +54,24 @@ public class Test {
                 try {
 
                     t = new String(GZIPUtil.uncompress(bytes), "Utf-8");
+
+
                 } catch (UnsupportedEncodingException e) {
                     e.printStackTrace();
                 }
                 System.out.println(channel.id() + " "+ new Date() +" "+ t);
             }
 
-
         }));
 
+
     }
 
-    public static class clientThread implements Runnable{
 
-        private Test t;
-
-        private   WebsocketConfig config;
-
-        public clientThread(Test test, WebsocketConfig config){
-            this.t = test;
-            this.config = config;
-        }
-
-        public void run() {
-            t.wsclient(config);
-        }
+    public void close(){
+        creator.closeConnection();
     }
+
+
 
 }
