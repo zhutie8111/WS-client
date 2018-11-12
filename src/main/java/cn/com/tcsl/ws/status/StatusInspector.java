@@ -1,53 +1,87 @@
 package cn.com.tcsl.ws.status;
 
 import cn.com.tcsl.ws.ClientInstance;
+import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Administrator on 2018/11/9.
  */
 public class StatusInspector implements Runnable{
 
+    /**
+     * 被监控的WS 客户端实例
+     */
     private ClientInstance clientInstance;
 
-    private boolean running = false;
+    private boolean running = true;
 
-    private boolean autoReboot = false;
+    private long DEFAULT_CHECK_ALIVE_DURATION = 30;
 
     public StatusInspector(ClientInstance clientInstance){
         this.clientInstance = clientInstance;
     }
 
     public void run() {
-        while (running){
-            if (!clientInstance.isReady()){
 
-                try {
-                    Channel channel = clientInstance.getChannel();
-                    if (channel == null){
-                        if (isAutoReboot()){
-                            //TODO: restart automatically
+        setCustomizedConfig();
+
+        try{
+
+            while (running){
+
+                Channel channel = clientInstance.getWebsocketPushClient().getChannel();
+                if (channel!=null && !channel.isActive()){
+
+                    LogUtils.console_print("channel is not live");
+
+
+
+                    Boolean autoRebootClient = clientInstance.getWebsocketPushClient().getWebsocketConfig().getAutoRebootClient();
+                    if (autoRebootClient != null){
+                        if (autoRebootClient.booleanValue()){
+
+                           // clientInstance.closeConnection();
+
+
+
+                            clientInstance.connect();
+
+                            running = false;
 
                         }
 
-                    }else if (channel != null && !channel.isActive()){
-
-                        //TODO: restart automatically
-
                     }
 
-
-                } catch (Exception e) {
-                    e.printStackTrace();
+                }else if (channel == null){
+                    LogUtils.console_print("channel was not created. ");
+                }else{
+                    LogUtils.console_print("channel is working");
                 }
-            }else{
 
+                TimeUnit.SECONDS.sleep(DEFAULT_CHECK_ALIVE_DURATION);
             }
+
+        }catch (Exception e){
+
+            throw new RuntimeException(e);
 
         }
 
     }
 
+
+    protected void setCustomizedConfig(){
+
+        if (clientInstance != null){
+
+          if (clientInstance.getWebsocketPushClient().getWebsocketConfig().getCheckLiveDuration() != null){
+              DEFAULT_CHECK_ALIVE_DURATION = clientInstance.getWebsocketPushClient().getWebsocketConfig().getCheckLiveDuration();
+          }
+        }
+    }
 
 
 
@@ -55,11 +89,5 @@ public class StatusInspector implements Runnable{
         this.running = running;
     }
 
-    public boolean isAutoReboot() {
-        return autoReboot;
-    }
 
-    public void setAutoReboot(boolean autoReboot) {
-        this.autoReboot = autoReboot;
-    }
 }

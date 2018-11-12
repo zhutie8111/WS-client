@@ -1,5 +1,6 @@
 package cn.com.tcsl.ws;
 
+import cn.com.tcsl.ws.status.ClientKeepalive;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
 
@@ -20,22 +21,30 @@ public class WebsocketClientInstance implements ClientInstance {
 
     private ReceiveMessage receiveMessage;
 
-    private boolean keepAlive;
+    private ClientKeepalive clientKeepalive;
 
     public WebsocketClientInstance(WebsocketPushClient client){
         this.websocketPushClient = client;
     }
 
     public void connect(){
+
         if (this.websocketPushClient != null){
 
-            websocketPushClient.setReceiveMessage(receiveMessage);
+            websocketPushClient.setReceiveMessage(websocketPushClient.getReceiveMessage());
+            websocketPushClient.setWebsocketConfig(websocketPushClient.getWebsocketConfig());
 
             ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(1));
             //ExecutorService executorService = Executors.newSingleThreadExecutor();
             future = executorService.submit(new ClientWorkerThread(websocketPushClient));
             executorService.shutdown();
+
+            if (websocketPushClient.getWebsocketConfig().getKeepAlive() != null && websocketPushClient.getWebsocketConfig().getKeepAlive()){
+                clientKeepalive = new ClientKeepalive();
+                clientKeepalive.setClientInstance(this);
+                clientKeepalive.watcher();
+            }
         }
     }
 
@@ -47,10 +56,15 @@ public class WebsocketClientInstance implements ClientInstance {
             if (future != null && future.isDone()){
 
                 WebsocketPushClient client = future.get();
-                Channel ch = client.getChannel();
-                ch.writeAndFlush(new CloseWebSocketFrame());
-                ch.closeFuture().sync();
-                client.getGroupCopy().shutdownGracefully();
+
+
+                if (client!=null){
+                    Channel ch = client.getChannel();
+                    ch.writeAndFlush(new CloseWebSocketFrame());
+                    ch.closeFuture().sync();
+                    client.getGroupCopy().shutdownGracefully();
+                }
+
             }else{
                 throw new RuntimeException("Fail to get Websocket client.");
             }
@@ -89,20 +103,13 @@ public class WebsocketClientInstance implements ClientInstance {
         this.receiveMessage = receiveMessage;
     }
 
-    /* public class ClientWorkerThread implements Callable<WebsocketPushClient>{
+    public WebsocketConfig getWebsocketConfig() {
+        return websocketConfig;
+    }
 
-        private  WebsocketPushClient websocketPushClient;
-
-        public ClientWorkerThread(WebsocketPushClient client){
-            this.websocketPushClient = client;
-        }
-
-        public WebsocketPushClient call() throws Exception {
-            websocketPushClient.connect();
-            return websocketPushClient;
-        }
-    }*/
-
+    public void setWebsocketConfig(WebsocketConfig websocketConfig) {
+        this.websocketConfig = websocketConfig;
+    }
 
     public boolean isReady(){
         if (channel != null && channel.isActive()){

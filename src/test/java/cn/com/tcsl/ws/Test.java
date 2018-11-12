@@ -27,12 +27,12 @@ public class Test {
         t.ready();
         t.connectToServer();
         try {
-            TimeUnit.SECONDS.sleep(0);
+            TimeUnit.SECONDS.sleep(60);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
         t.sendPing();
-        //t.close();
+        t.close();
     }
 
     public void before(){
@@ -44,6 +44,9 @@ public class Test {
         params.put("shopId", 318);
 
         config.setSuffixParams(params);
+
+        config.setKeepAlive(true);
+        config.setAutoRebootClient(true);
     }
 
 
@@ -65,6 +68,8 @@ public class Test {
             }
 
         }));
+
+
 
     }
 

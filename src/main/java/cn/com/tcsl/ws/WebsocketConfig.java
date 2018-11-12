@@ -17,6 +17,14 @@ public class WebsocketConfig {
 
     private Map<String, Object> suffixParams;
 
+    // Optional settings below
+
+    private Long checkLiveDuration;
+
+    private Boolean autoRebootClient;
+
+    private Boolean keepAlive;
+
 
     public WebsocketConfig (){
     }
@@ -79,5 +87,30 @@ public class WebsocketConfig {
 
     public void setSuffixParams(Map<String, Object> suffixParams) {
         this.suffixParams = suffixParams;
+    }
+
+    public Long getCheckLiveDuration() {
+        return checkLiveDuration;
+    }
+
+    public void setCheckLiveDuration(Long checkLiveDuration) {
+        this.checkLiveDuration = checkLiveDuration;
+    }
+
+    public Boolean getAutoRebootClient() {
+        return autoRebootClient;
+    }
+
+    public void setAutoRebootClient(Boolean autoRebootClient) {
+        this.autoRebootClient = autoRebootClient;
+    }
+
+
+    public Boolean getKeepAlive() {
+        return keepAlive;
+    }
+
+    public void setKeepAlive(Boolean keepAlive) {
+        this.keepAlive = keepAlive;
     }
 }

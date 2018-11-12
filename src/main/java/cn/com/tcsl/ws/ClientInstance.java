@@ -17,4 +17,6 @@ public interface ClientInstance {
 
     public WebsocketPushClient getWebsocketPushClient();
 
+    public WebsocketConfig getWebsocketConfig();
+
 }

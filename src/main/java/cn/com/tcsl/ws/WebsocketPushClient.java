@@ -165,6 +165,14 @@ public class WebsocketPushClient {
         this.receiveMessage = receiveMessage;
     }
 
+    public WebsocketConfig getWebsocketConfig() {
+        return websocketConfig;
+    }
+
+    public ReceiveMessage getReceiveMessage() {
+        return receiveMessage;
+    }
+
     public Channel getChannel() {
         return channel;
     }
