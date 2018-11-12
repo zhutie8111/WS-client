@@ -15,29 +15,38 @@ public class PushMessage {
 
     private Channel channel;
 
+    public PushMessage(){};
+
+    public PushMessage(Channel channel){
+        this.channel = channel;
+    }
+
     public void send(Object object){
-        if (channel != null){
+        if (channel != null ){
 
-            if (object instanceof String){
-                String text = (String) object;
-                TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(text);
-                channel.writeAndFlush(textWebSocketFrame);
+            if (channel.isActive()){
+                if (object instanceof String){
+                    String text = (String) object;
+                    TextWebSocketFrame textWebSocketFrame = new TextWebSocketFrame(text);
+                    channel.writeAndFlush(textWebSocketFrame);
 
-            }else if(object instanceof byte[]){
-                byte[] bytes = (byte[])object;
-                ByteBuf buf = Unpooled.buffer();
-                buf.writeBytes(bytes);
-                BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame(buf);
-                channel.writeAndFlush(binaryWebSocketFrame);
+                }else if(object instanceof byte[]){
+                    byte[] bytes = (byte[])object;
+                    ByteBuf buf = Unpooled.buffer();
+
+                    buf.writeBytes(bytes);
+                    BinaryWebSocketFrame binaryWebSocketFrame = new BinaryWebSocketFrame(buf);
+                    channel.writeAndFlush(binaryWebSocketFrame);
+                }else{
+                    channel.writeAndFlush(object);
+                }
 
             }else{
-
-                channel.writeAndFlush(object);
-
+                throw new RuntimeException("The channel was not active.");
             }
 
         }else{
-            throw new RuntimeException("There was not valid channel to send message");
+            throw new RuntimeException("There was not valid channel to send message.");
         }
 
     }

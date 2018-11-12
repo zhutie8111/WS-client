@@ -1,10 +1,7 @@
 package cn.com.tcsl.ws;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -36,7 +33,7 @@ public class WebsocketPushClient {
 
     private Channel channel;
 
-    private EventLoopGroup groupCopy ;
+    private EventLoopGroup groupCopy;
 
 
     //static final String URL = System.getProperty("url", "ws://192.168.9.215:9001/websocket?shopId=325");
@@ -57,7 +54,7 @@ public class WebsocketPushClient {
         this.receiveMessage = receiveMessage;
     }
 
-    public void connect() throws Exception{
+    protected void connect() throws Exception{
         {
             getUrl();
             URI uri = new URI(url);
@@ -86,7 +83,7 @@ public class WebsocketPushClient {
             final SslContext sslCtx;
             if (ssl) {
                  sslCtx = SslContextBuilder.forClient().trustManager(InsecureTrustManagerFactory.INSTANCE).build();
-                //sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE); //for 4.0.* version
+                //sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE); //Only for 4.0.* version
             } else {
                 sslCtx = null;
             }
@@ -102,53 +99,33 @@ public class WebsocketPushClient {
                                         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
                 Bootstrap b = new Bootstrap();
+
                 b.group(group)
                         .channel(NioSocketChannel.class)
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
                             protected void initChannel(SocketChannel ch) {
-                                ChannelPipeline p = ch.pipeline();
+                                ChannelPipeline pipeline = ch.pipeline();
                                 //wss 连接
                                 if (sslCtx != null) {
-                                    p.addLast(sslCtx.newHandler(ch.alloc(), host, port));
+                                    pipeline.addLast(sslCtx.newHandler(ch.alloc(), host, port));
                                 }
-                                p.addLast(
+                                pipeline.addLast(
                                         new HttpClientCodec(),
                                         new HttpObjectAggregator(httpMaxContentLength),
                                         WebSocketClientCompressionHandler.INSTANCE,
                                         handler);
                             }
-                        });
+                        }).option(ChannelOption.SO_KEEPALIVE, true)
+
+                ;
 
                 //连接服务器
                 Channel ch = b.connect(uri.getHost(), port).sync().channel();
                 channel = ch;
                 handler.handshakeFuture().sync();
 
-/*                synchronized(this){
-                    closeFlag.wait();
-                }*/
-
-
                 //ch.closeFuture().sync();
-
-                /*BufferedReader console = new BufferedReader(new InputStreamReader(System.in));
-                while (true) {
-                    String msg = console.readLine();
-                    if (msg == null) {
-                        break;
-                    } else if ("bye".equals(msg.toLowerCase())) {
-                        ch.writeAndFlush(new CloseWebSocketFrame());
-                        ch.closeFuture().sync();
-                        break;
-                    } else if ("ping".equals(msg.toLowerCase())) {
-                        WebSocketFrame frame = new PingWebSocketFrame(Unpooled.wrappedBuffer(new byte[] { 8, 1, 8, 1 }));
-                        ch.writeAndFlush(frame);
-                    } else {
-                        WebSocketFrame frame = new TextWebSocketFrame(msg);
-                        ch.writeAndFlush(frame);
-                    }
-                }*/
 
             } finally {
                // group.shutdownGracefully();

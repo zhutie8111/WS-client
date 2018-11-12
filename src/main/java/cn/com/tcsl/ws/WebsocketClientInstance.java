@@ -8,7 +8,7 @@ import java.util.concurrent.*;
 /**
  * Created by Tony on 2018/11/3.
  */
-public class WebsocketClientInstance {
+public class WebsocketClientInstance implements ClientInstance {
 
     private WebsocketConfig websocketConfig;
 
@@ -20,62 +20,34 @@ public class WebsocketClientInstance {
 
     public WebsocketClientInstance(WebsocketPushClient client){
         this.websocketPushClient = client;
-
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        future = executorService.submit(new ClientThread(websocketPushClient));
-
-
-
-       // connect();
     }
 
-    public WebsocketClientInstance(WebsocketConfig config, WebsocketPushClient client){
-        this.websocketConfig = config;
-        this.websocketPushClient = client;
+    public void connect(){
+        if (this.websocketPushClient != null){
 
-        websocketPushClient.setWebsocketConfig(websocketConfig);
-
-        ExecutorService executorService = Executors.newSingleThreadExecutor();
-        future = executorService.submit(new ClientThread(websocketPushClient));
-
-
-        // connect();
-    }
-
-    protected void connect(){
-
-        try {
-            websocketPushClient.connect();
-            channel = websocketPushClient.getChannel();
-        } catch (Exception e) {
-            e.printStackTrace();
-
+            ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
+                    new LinkedBlockingQueue<Runnable>(1));
+            //ExecutorService executorService = Executors.newSingleThreadExecutor();
+            future = executorService.submit(new ClientThread(websocketPushClient));
+            executorService.shutdown();
         }
-
     }
+
 
     public void closeConnection(){
-        /*if (getChannel() != null){
-            if (getChannel().isActive()){
-                CloseWebSocketFrame closeWebSocketFrame = new CloseWebSocketFrame();
-                getChannel().writeAndFlush(closeWebSocketFrame);
-            }else{
-                throw new RuntimeException("Channel is not active");
-            }
-        }else{
-            throw new RuntimeException("Channel is null");
-        }*/
+
         try{
 
-            if (future.isDone()){
+            if (future != null && future.isDone()){
 
                 WebsocketPushClient client = future.get();
                 Channel ch = client.getChannel();
                 ch.writeAndFlush(new CloseWebSocketFrame());
                 ch.closeFuture().sync();
                 client.getGroupCopy().shutdownGracefully();
+            }else{
+                throw new RuntimeException("Fail to get Websocket client.");
             }
-
 
         }catch (Exception e){
             e.printStackTrace();
@@ -84,43 +56,45 @@ public class WebsocketClientInstance {
 
     }
 
-    protected Channel getChannel(){
+    public Channel getChannel() throws Exception{
 
-       // if (future.isDone()){
-            try {
-                channel = future.get().getChannel();
-                return channel;
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            } catch (ExecutionException e) {
-                e.printStackTrace();
-            }
-        //}
+        if (future != null && future.isDone()){
+            channel = future.get().getChannel();
+            return channel;
+        }
+
         return null;
     }
 
-    public void setWebsocketConfig(WebsocketConfig websocketConfig) {
-        this.websocketConfig = websocketConfig;
-    }
 
     public void setWebsocketPushClient(WebsocketPushClient websocketPushClient) {
         this.websocketPushClient = websocketPushClient;
+    }
+
+    public WebsocketPushClient getWebsocketPushClient() {
+        return websocketPushClient;
     }
 
     public class ClientThread implements Callable<WebsocketPushClient>{
 
         private  WebsocketPushClient websocketPushClient;
 
-
         public ClientThread(WebsocketPushClient client){
             this.websocketPushClient = client;
         }
 
-
         public WebsocketPushClient call() throws Exception {
             websocketPushClient.connect();
-           // return websocketPushClient.getChannel();
             return websocketPushClient;
+        }
+    }
+
+
+    public boolean isReady(){
+        if (channel != null && channel.isActive()){
+            return true;
+        }else{
+            return false;
         }
     }
 

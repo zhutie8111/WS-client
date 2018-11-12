@@ -93,11 +93,11 @@ public class GZIPUtil {
         return uncompressToString(bytes, GZIP_ENCODE_UTF_8);
     }
 
-    public static void main(String[] args) throws IOException {
+    /*public static void main(String[] args) throws IOException {
         String s = "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa";
         System.out.println("字符串长度："+s.length());
         System.out.println("压缩后：："+compress(s).length);
         System.out.println("解压后："+uncompress(compress(s)).length);
         System.out.println("解压字符串后：："+uncompressToString(compress(s)).length());
-    }
+    }*/
 }

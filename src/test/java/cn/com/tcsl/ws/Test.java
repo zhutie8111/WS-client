@@ -18,19 +18,21 @@ public class Test {
 
     private WebsocketConfig config;
 
-    private WebsocketClientInstance creator;
+    private ClientInstance instance;
 
     public static void main(String args[]){
         Test t = new Test();
 
         t.before();
-        t.test1();
+        t.ready();
+        t.connectToServer();
         try {
-            TimeUnit.SECONDS.sleep(1);
+            TimeUnit.SECONDS.sleep(0);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
-        t.close();
+        t.sendPing();
+        //t.close();
     }
 
     public void before(){
@@ -45,8 +47,8 @@ public class Test {
     }
 
 
-    public void test1(){
-        creator = new WebsocketClientInstance(new WebsocketPushClient(config, new ReceiveMessage(){
+    public void ready(){
+        instance = new WebsocketClientInstance(new WebsocketPushClient(config, new ReceiveMessage(){
 
 
             public void onMessage(Channel channel, byte[] bytes){
@@ -64,12 +66,31 @@ public class Test {
 
         }));
 
+    }
 
+    public void sendPing(){
+
+        PushMessage pushMessage = null;
+        try {
+
+           if( !instance.isReady()) return;
+            pushMessage = new PushMessage(instance.getChannel());
+            pushMessage.ping();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+
+    }
+
+    public void connectToServer(){
+
+        instance.connect();
     }
 
 
     public void close(){
-        creator.closeConnection();
+        instance.closeConnection();
     }
 
 

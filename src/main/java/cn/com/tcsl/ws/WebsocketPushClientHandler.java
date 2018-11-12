@@ -91,15 +91,19 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
             BinaryWebSocketFrame binaryFrame = (BinaryWebSocketFrame)msg;
 
             ByteBuf buf = binaryFrame.content();
-            int availableBytesNumber = buf.readableBytes();
-            byte[] receivedBytes = new byte[availableBytesNumber];
-            buf.readBytes(receivedBytes);
+
+            if (buf.isReadable()){
+                int availableBytesNumber = buf.readableBytes();
+                byte[] receivedBytes = new byte[availableBytesNumber];
+                buf.readBytes(receivedBytes);
+                receiveMessage.onMessage(ch, receivedBytes);
+            }
 
             //buf.release();
 
             // byte [] bytes = receivedBytes;
 
-            receiveMessage.onMessage(ch, receivedBytes);//执行后将关闭
+
 
         }
 
