@@ -1,6 +1,6 @@
 package cn.com.tcsl.ws.status;
 
-import cn.com.tcsl.ws.WebsocketClientInstance;
+import cn.com.tcsl.ws.ClientInstance;
 import cn.com.tcsl.ws.WebsocketConfig;
 
 import java.util.concurrent.ExecutorService;
@@ -13,7 +13,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class ClientKeepalive {
 
-    private WebsocketClientInstance clientInstance;
+    private ClientInstance clientInstance;
 
     private WebsocketConfig config;
 
@@ -21,7 +21,7 @@ public class ClientKeepalive {
         ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                 new LinkedBlockingQueue<Runnable>(1));
 
-        getClientInstance().getWebsocketPushClient().setWebsocketConfig(config);
+        //getClientInstance().getWebsocketPushClient().setWebsocketConfig(config);
         StatusInspector inspector = new StatusInspector(getClientInstance());
         inspector.setAutoReboot(true);
 
@@ -30,11 +30,11 @@ public class ClientKeepalive {
 
     }
 
-    public WebsocketClientInstance getClientInstance() {
+    public ClientInstance getClientInstance() {
         return clientInstance;
     }
 
-    public void setClientInstance(WebsocketClientInstance clientInstance) {
+    public void setClientInstance(ClientInstance clientInstance) {
         this.clientInstance = clientInstance;
     }
 

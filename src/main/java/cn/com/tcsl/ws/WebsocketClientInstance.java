@@ -18,6 +18,10 @@ public class WebsocketClientInstance implements ClientInstance {
 
     private Future<WebsocketPushClient> future;
 
+    private ReceiveMessage receiveMessage;
+
+    private boolean keepAlive;
+
     public WebsocketClientInstance(WebsocketPushClient client){
         this.websocketPushClient = client;
     }
@@ -25,10 +29,12 @@ public class WebsocketClientInstance implements ClientInstance {
     public void connect(){
         if (this.websocketPushClient != null){
 
+            websocketPushClient.setReceiveMessage(receiveMessage);
+
             ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(1));
             //ExecutorService executorService = Executors.newSingleThreadExecutor();
-            future = executorService.submit(new ClientThread(websocketPushClient));
+            future = executorService.submit(new ClientWorkerThread(websocketPushClient));
             executorService.shutdown();
         }
     }
@@ -75,11 +81,19 @@ public class WebsocketClientInstance implements ClientInstance {
         return websocketPushClient;
     }
 
-    public class ClientThread implements Callable<WebsocketPushClient>{
+    public ReceiveMessage getReceiveMessage() {
+        return receiveMessage;
+    }
+
+    public void setReceiveMessage(ReceiveMessage receiveMessage) {
+        this.receiveMessage = receiveMessage;
+    }
+
+    /* public class ClientWorkerThread implements Callable<WebsocketPushClient>{
 
         private  WebsocketPushClient websocketPushClient;
 
-        public ClientThread(WebsocketPushClient client){
+        public ClientWorkerThread(WebsocketPushClient client){
             this.websocketPushClient = client;
         }
 
@@ -87,7 +101,7 @@ public class WebsocketClientInstance implements ClientInstance {
             websocketPushClient.connect();
             return websocketPushClient;
         }
-    }
+    }*/
 
 
     public boolean isReady(){

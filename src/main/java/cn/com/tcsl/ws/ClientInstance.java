@@ -15,4 +15,6 @@ public interface ClientInstance {
 
     public boolean isReady();
 
+    public WebsocketPushClient getWebsocketPushClient();
+
 }

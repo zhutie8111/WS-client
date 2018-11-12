@@ -17,6 +17,7 @@ public class WebsocketConfig {
 
     private Map<String, Object> suffixParams;
 
+
     public WebsocketConfig (){
     }
 

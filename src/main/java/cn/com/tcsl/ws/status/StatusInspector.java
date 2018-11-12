@@ -1,6 +1,6 @@
 package cn.com.tcsl.ws.status;
 
-import cn.com.tcsl.ws.WebsocketClientInstance;
+import cn.com.tcsl.ws.ClientInstance;
 import io.netty.channel.Channel;
 
 /**
@@ -8,26 +8,26 @@ import io.netty.channel.Channel;
  */
 public class StatusInspector implements Runnable{
 
-    private WebsocketClientInstance clientInstance;
+    private ClientInstance clientInstance;
 
-    private boolean running = true;
+    private boolean running = false;
 
     private boolean autoReboot = false;
 
-    public StatusInspector( WebsocketClientInstance clientInstance){
+    public StatusInspector(ClientInstance clientInstance){
         this.clientInstance = clientInstance;
     }
 
     public void run() {
         while (running){
-            if (clientInstance.isReady()){
+            if (!clientInstance.isReady()){
 
                 try {
                     Channel channel = clientInstance.getChannel();
                     if (channel == null){
                         if (isAutoReboot()){
                             //TODO: restart automatically
-                            clientInstance.connect();
+
                         }
 
                     }else if (channel != null && !channel.isActive()){
@@ -47,6 +47,9 @@ public class StatusInspector implements Runnable{
         }
 
     }
+
+
+
 
     public void setRunning(boolean running) {
         this.running = running;
