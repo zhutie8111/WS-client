@@ -12,11 +12,14 @@ public class ClientWorkerThread implements Callable<WebsocketPushClient> {
 
     public ClientWorkerThread(WebsocketPushClient client){
         this.websocketPushClient = client;
+
     }
 
     public WebsocketPushClient call() throws Exception {
         websocketPushClient.connect();
         return websocketPushClient;
     }
+
+
 
 }

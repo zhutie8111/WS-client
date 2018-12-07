@@ -31,20 +31,22 @@ public class WebsocketClientInstance implements ClientInstance {
 
         if (this.websocketPushClient != null){
 
-            websocketPushClient.setReceiveMessage(websocketPushClient.getReceiveMessage());
-            websocketPushClient.setWebsocketConfig(websocketPushClient.getWebsocketConfig());
+            //websocketPushClient.setReceiveMessage(websocketPushClient.getReceiveMessage());
+           // websocketPushClient.setWebsocketConfig(websocketPushClient.getWebsocketConfig());
 
             ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(1));
             //ExecutorService executorService = Executors.newSingleThreadExecutor();
+
             future = executorService.submit(new ClientWorkerThread(websocketPushClient));
             executorService.shutdown();
 
-            if (websocketPushClient.getWebsocketConfig().getKeepAlive() != null && websocketPushClient.getWebsocketConfig().getKeepAlive()){
+
+        }
+        if (websocketPushClient.getWebsocketConfig().getKeepAlive() != null && websocketPushClient.getWebsocketConfig().getKeepAlive()){
                 clientKeepalive = new ClientKeepalive();
                 clientKeepalive.setClientInstance(this);
                 clientKeepalive.watcher();
-            }
         }
     }
 
@@ -57,11 +59,12 @@ public class WebsocketClientInstance implements ClientInstance {
 
                 WebsocketPushClient client = future.get();
 
-
                 if (client!=null){
                     Channel ch = client.getChannel();
+
                     ch.writeAndFlush(new CloseWebSocketFrame());
                     ch.closeFuture().sync();
+                    ch.close();
                     client.getGroupCopy().shutdownGracefully();
                 }
 

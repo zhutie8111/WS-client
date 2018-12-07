@@ -40,16 +40,14 @@ public class WebsocketPushClient {
 
     public WebsocketPushClient(WebsocketConfig config){
 
-        websocketConfig = config;
+        this.websocketConfig = config;
 
-        receiveMessage = new ReceiveMessage(){
-
-        };
+        this.receiveMessage = new ReceiveMessage(){};
     }
 
     public WebsocketPushClient(WebsocketConfig config, ReceiveMessage receiveMessage){
 
-        websocketConfig = config;
+        this.websocketConfig = config;
 
         this.receiveMessage = receiveMessage;
     }
@@ -126,10 +124,10 @@ public class WebsocketPushClient {
                 handler.handshakeFuture().sync();
 
                 //ch.closeFuture().sync();
-
+                groupCopy = group;
             } finally {
                // group.shutdownGracefully();
-                groupCopy = group;
+
             }
         }
 

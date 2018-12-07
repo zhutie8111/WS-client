@@ -1,6 +1,7 @@
 package cn.com.tcsl.ws.status;
 
 import cn.com.tcsl.ws.ClientInstance;
+import cn.com.tcsl.ws.WebsocketClientInstance;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 
@@ -37,16 +38,13 @@ public class StatusInspector implements Runnable{
 
                     LogUtils.console_print("channel is not live");
 
-
-
                     Boolean autoRebootClient = clientInstance.getWebsocketPushClient().getWebsocketConfig().getAutoRebootClient();
                     if (autoRebootClient != null){
                         if (autoRebootClient.booleanValue()){
 
                            // clientInstance.closeConnection();
-
-
-
+                            //clientInstance.connect();
+                            clientInstance = new WebsocketClientInstance(clientInstance.getWebsocketPushClient());
                             clientInstance.connect();
 
                             running = false;
