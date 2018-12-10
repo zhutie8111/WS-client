@@ -102,7 +102,7 @@ public class WebsocketPushClient {
                                         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
                 Bootstrap b = new Bootstrap();
-
+                
                 b.group(group)
                         .channel(NioSocketChannel.class)
                         .handler(new ChannelInitializer<SocketChannel>() {
@@ -127,7 +127,7 @@ public class WebsocketPushClient {
                 ChannelFuture channelFuture = b.connect(uri.getHost(), port).sync();
                 channel = channelFuture.channel();
                 handler.handshakeFuture().sync();
-
+               
                 //ch.closeFuture().sync();
                 groupCopy = group;
             } finally {
