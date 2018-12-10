@@ -1,14 +1,14 @@
 package cn.com.tcsl.ws.status;
 
+import java.util.concurrent.TimeUnit;
+
 import cn.com.tcsl.ws.ClientInstance;
 import cn.com.tcsl.ws.WebsocketClientInstance;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 
-import java.util.concurrent.TimeUnit;
-
 /**
- * Created by Administrator on 2018/11/9.
+ * Created by Tony zhu on 2018/11/9.
  */
 public class StatusInspector implements Runnable{
 

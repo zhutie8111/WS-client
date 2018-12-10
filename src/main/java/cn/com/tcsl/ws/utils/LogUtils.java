@@ -1,7 +1,7 @@
 package cn.com.tcsl.ws.utils;
 
 /**
- * Created by Administrator on 2018/11/12.
+ * Created by Tony zhu on 2018/11/12.
  */
 public class LogUtils {
 

@@ -3,7 +3,7 @@ package cn.com.tcsl.ws.status;
 import cn.com.tcsl.ws.ClientInstance;
 
 /**
- * Created by Administrator on 2018/11/9.
+ * Created by Tony zhu on 2018/11/9.
  */
 public class ClientKeepalive {
 
