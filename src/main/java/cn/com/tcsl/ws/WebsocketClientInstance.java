@@ -1,10 +1,14 @@
 package cn.com.tcsl.ws;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+
 import cn.com.tcsl.ws.status.ClientKeepalive;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-
-import java.util.concurrent.*;
 
 /**
  * Created by Tony on 2018/11/3.
@@ -27,6 +31,10 @@ public class WebsocketClientInstance implements ClientInstance {
         this.websocketPushClient = client;
     }
 
+    /**
+     * create a thread to start the websocket client
+     * 
+     */
     public void connect(){
 
         if (this.websocketPushClient != null){

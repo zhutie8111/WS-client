@@ -1,7 +1,15 @@
 package cn.com.tcsl.ws;
 
+import java.net.URI;
+import java.util.Map;
+
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.*;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelInitializer;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.ChannelPipeline;
+import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -14,9 +22,6 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
-
-import java.net.URI;
-import java.util.Map;
 
 /**
  * Created by Tony on 2018/11/3.
@@ -119,8 +124,8 @@ public class WebsocketPushClient {
                 ;
 
                 //连接服务器
-                Channel ch = b.connect(uri.getHost(), port).sync().channel();
-                channel = ch;
+                ChannelFuture channelFuture = b.connect(uri.getHost(), port).sync();
+                channel = channelFuture.channel();
                 handler.handshakeFuture().sync();
 
                 //ch.closeFuture().sync();
