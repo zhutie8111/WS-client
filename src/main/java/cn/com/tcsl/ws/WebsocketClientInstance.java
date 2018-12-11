@@ -23,8 +23,6 @@ public class WebsocketClientInstance implements ClientInstance {
 
     private Future<WebsocketPushClient> future;
 
-    private ReceiveMessage receiveMessage;
-
     private ClientKeepalive clientKeepalive;
 
     public WebsocketClientInstance(WebsocketPushClient client){
@@ -51,7 +49,9 @@ public class WebsocketClientInstance implements ClientInstance {
 
 
         }
-        if (websocketPushClient.getWebsocketConfig().getKeepAlive() != null && websocketPushClient.getWebsocketConfig().getKeepAlive()){
+        
+        Boolean keepLiveFlag = websocketPushClient.getWebsocketConfig().getKeepAlive();
+        if ( keepLiveFlag != null && keepLiveFlag){
                 clientKeepalive = new ClientKeepalive();
                 clientKeepalive.setClientInstance(this);
                 clientKeepalive.watcher();
@@ -69,7 +69,7 @@ public class WebsocketClientInstance implements ClientInstance {
 
                 if (client!=null){
                     Channel ch = client.getChannel();
-
+                     
                     ch.writeAndFlush(new CloseWebSocketFrame());
                     ch.closeFuture().sync();
                     ch.close();
@@ -104,14 +104,6 @@ public class WebsocketClientInstance implements ClientInstance {
 
     public WebsocketPushClient getWebsocketPushClient() {
         return websocketPushClient;
-    }
-
-    public ReceiveMessage getReceiveMessage() {
-        return receiveMessage;
-    }
-
-    public void setReceiveMessage(ReceiveMessage receiveMessage) {
-        this.receiveMessage = receiveMessage;
     }
 
     public WebsocketConfig getWebsocketConfig() {

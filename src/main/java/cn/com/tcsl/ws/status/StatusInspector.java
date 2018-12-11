@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit;
 
 import cn.com.tcsl.ws.ClientInstance;
 import cn.com.tcsl.ws.WebsocketClientInstance;
-import cn.com.tcsl.ws.exception.WebSocketClientException;
+import cn.com.tcsl.ws.exception.WebSocketClientConfigException;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 
@@ -79,7 +79,7 @@ public class StatusInspector implements Runnable{
           if ( configCheckLiveDuration != null){
         	  
         	  if (configCheckLiveDuration <= 0){
-        		  throw new WebSocketClientException("invalid the parameter of checkLiveDuration");
+        		  throw new WebSocketClientConfigException("invalid configuration of the parameter checkLiveDuration");
         	  }
         	  
               DEFAULT_CHECK_ALIVE_DURATION = configCheckLiveDuration;
