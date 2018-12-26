@@ -13,5 +13,13 @@ public class LogUtils {
         }
 
     }
+    
+    /**
+     * The way to hide the console logs.
+     * @param bool
+     */
+    public static void setConsolePringFlag(boolean bool){
+    	console_print_flag = bool;
+    }
 
 }

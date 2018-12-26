@@ -6,6 +6,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import cn.com.tcsl.ws.exception.WebSocketClientException;
 import cn.com.tcsl.ws.status.ClientKeepalive;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -67,17 +68,19 @@ public class WebsocketClientInstance implements ClientInstance {
 
                 WebsocketPushClient client = future.get();
 
-                if (client!=null){
+                if (client != null){
                     Channel ch = client.getChannel();
                      
                     ch.writeAndFlush(new CloseWebSocketFrame());
                     ch.closeFuture().sync();
                     ch.close();
-                    client.getGroupCopy().shutdownGracefully();
+                    if (client.getGroupCopy() == null){
+                    	client.getGroupCopy().shutdownGracefully();
+                    }
                 }
 
             }else{
-                throw new RuntimeException("Fail to get Websocket client.");
+                throw new WebSocketClientException("Fail to get Websocket client.");
             }
 
         }catch (Exception e){

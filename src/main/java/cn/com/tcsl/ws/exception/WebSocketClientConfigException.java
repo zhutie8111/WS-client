@@ -16,5 +16,7 @@ public class WebSocketClientConfigException extends RuntimeException {
 	public WebSocketClientConfigException(String msg, Throwable e){
 		super(msg, e);
 	}
+	
+	
 
 }
