@@ -1,12 +1,13 @@
 package cn.com.tcsl.ws.status;
 
-import java.util.concurrent.TimeUnit;
-
 import cn.com.tcsl.ws.ClientInstance;
 import cn.com.tcsl.ws.WebsocketClientInstance;
+import cn.com.tcsl.ws.WebsocketPushClient;
 import cn.com.tcsl.ws.exception.WebSocketClientConfigException;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by Tony zhu on 2018/11/9.
@@ -18,12 +19,18 @@ public class StatusInspector implements Runnable{
      */
     private ClientInstance clientInstance;
 
+    private WebsocketPushClient websocketPushClient;
+
     private boolean running = true;
 
     private long DEFAULT_CHECK_ALIVE_DURATION = 30;
 
     public StatusInspector(ClientInstance clientInstance){
         this.clientInstance = clientInstance;
+    }
+
+    public StatusInspector(WebsocketPushClient client){
+        websocketPushClient = client;
     }
 
     public void run() {
@@ -34,30 +41,29 @@ public class StatusInspector implements Runnable{
 
             while (running){
 
-                Channel channel = clientInstance.getWebsocketPushClient().getChannel();
+                Channel channel = websocketPushClient.getChannel();
                 if (channel!=null && !channel.isActive()){
 
                     LogUtils.console_print("channel is not live");
 
-                    Boolean autoRebootClient = clientInstance.getWebsocketPushClient().getWebsocketConfig().getAutoRebootClient();
+                    Boolean autoRebootClient = websocketPushClient.getWebsocketConfig().getAutoRebootClient();
                     if (autoRebootClient != null){
                         if (autoRebootClient.booleanValue()){
 
                            // clientInstance.closeConnection();
                             //clientInstance.connect();
-                            clientInstance = new WebsocketClientInstance(clientInstance.getWebsocketPushClient());
+                            clientInstance = new WebsocketClientInstance(websocketPushClient);
                             clientInstance.connect();
-
-                            running = false;
-
                         }
+
+                        running = false;
 
                     }
 
                 }else if (channel == null){
-                    LogUtils.console_print("channel was not created. ");
+                    LogUtils.console_print("status: channel was not created. ");
                 }else{
-                    LogUtils.console_print("channel is working");
+                    LogUtils.console_print("status: " + channel.id()+" channel is working");
                 }
 
                 TimeUnit.SECONDS.sleep(DEFAULT_CHECK_ALIVE_DURATION);

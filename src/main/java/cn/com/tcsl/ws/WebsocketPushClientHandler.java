@@ -16,11 +16,15 @@ import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
 import io.netty.util.CharsetUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by Tony on 2018/11/3.
  */
 public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Object> {
+
+    private static Logger logger = LoggerFactory.getLogger(LogUtils.LOG_PROFILE_NAME);
 
     private final WebSocketClientHandshaker handshaker;
 
@@ -47,12 +51,15 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
     }
 
     @Override
-    public void channelActive(ChannelHandlerContext ctx) {
+    public void channelActive(ChannelHandlerContext ctx) throws Exception{
+        super.channelActive(ctx);
         handshaker.handshake(ctx.channel());
+        LogUtils.console_print("channelActive");
     }
 
     @Override
-    public void channelInactive(ChannelHandlerContext ctx) {
+    public void channelInactive(ChannelHandlerContext ctx) throws Exception{
+        super.channelInactive(ctx);
         LogUtils.console_print("WebSocket Client disconnected!");
     }
 
@@ -65,7 +72,7 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
                 LogUtils.console_print("WebSocket Client connected!");
                 handshakeFuture.setSuccess();
             } catch (WebSocketHandshakeException e) {
-            	LogUtils.console_print("WebSocket Client failed to connect");
+            	LogUtils.console_print("WebSocket Client failed to connect, " + e.getMessage());
                 handshakeFuture.setFailure(e);
             }
             return;
@@ -91,7 +98,7 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
             receiveMessage.onMessage(ch, frame);
 
         } else if (frame instanceof CloseWebSocketFrame) {
-            System.out.println("WebSocket Client received closing");
+            System.out.println("WebSocket Client received close Frame");
 
             receiveMessage.onMessage(ch, frame);//执行后将关闭
 

@@ -1,15 +1,7 @@
 package cn.com.tcsl.ws;
 
-import java.net.URI;
-import java.util.Map;
-
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -22,6 +14,9 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+
+import java.net.URI;
+import java.util.Map;
 
 /**
  * Created by Tony on 2018/11/3.
@@ -101,9 +96,11 @@ public class WebsocketPushClient {
                                 WebSocketClientHandshakerFactory.newHandshaker(
                                         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
-                Bootstrap b = new Bootstrap();
-                
-                b.group(group)
+                Bootstrap bootstrap = new Bootstrap();
+
+                groupCopy = group;
+
+                bootstrap.group(group)
                         .channel(NioSocketChannel.class)
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
@@ -124,13 +121,13 @@ public class WebsocketPushClient {
                 ;
 
                 //连接服务器
-                ChannelFuture channelFuture = b.connect(uri.getHost(), port).sync();
+                ChannelFuture channelFuture = bootstrap.connect(uri.getHost(), port).sync();
                 channel = channelFuture.channel();
                 handler.handshakeFuture().sync();
                
                 //ch.closeFuture().sync();
-                groupCopy = group;
-            } finally {
+            }
+            finally {
                // group.shutdownGracefully();
 
             }

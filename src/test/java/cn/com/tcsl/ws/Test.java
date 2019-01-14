@@ -1,10 +1,7 @@
 package cn.com.tcsl.ws;
 
-import cn.com.tcsl.ws.utils.GZIPUtil;
-import io.netty.channel.Channel;
+import cn.com.tcsl.ws.message.DefaultReceiveMessage;
 
-import java.io.UnsupportedEncodingException;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +24,7 @@ public class Test {
         t.ready();
         t.connectToServer();
         try {
-            TimeUnit.SECONDS.sleep(60);
+            TimeUnit.SECONDS.sleep(20);
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -37,7 +34,7 @@ public class Test {
 
     public void before(){
         config = new WebsocketConfig();
-        config.setHost("192.168.9.215");
+        config.setHost("192.168.9.214");
         config.setPort(9001);
         config.setPath("websocket");
         Map<String, Object> params = new HashMap<String, Object>();
@@ -51,21 +48,9 @@ public class Test {
 
 
     public void ready(){
-        instance = new WebsocketClientInstance(new WebsocketPushClient(config, new ReceiveMessage(){
+        instance = new WebsocketClientInstance(new WebsocketPushClient(config, new DefaultReceiveMessage(){
 
 
-            public void onMessage(Channel channel, byte[] bytes){
-                String t = null;
-                try {
-
-                    t = new String(GZIPUtil.uncompress(bytes), "Utf-8");
-
-
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
-                }
-                System.out.println(channel.id() + " "+ new Date() +" "+ t);
-            }
 
         }));
 

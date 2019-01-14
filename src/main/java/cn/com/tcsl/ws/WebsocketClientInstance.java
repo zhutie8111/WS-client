@@ -1,20 +1,20 @@
 package cn.com.tcsl.ws;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
 import cn.com.tcsl.ws.exception.WebSocketClientException;
-import cn.com.tcsl.ws.status.ClientKeepalive;
+import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.util.concurrent.*;
 
 /**
  * Created by Tony on 2018/11/3.
  */
 public class WebsocketClientInstance implements ClientInstance {
+
+    private Logger logger = LoggerFactory.getLogger(LogUtils.LOG_PROFILE_NAME);
 
     private WebsocketConfig websocketConfig;
 
@@ -23,8 +23,6 @@ public class WebsocketClientInstance implements ClientInstance {
     private Channel channel;
 
     private Future<WebsocketPushClient> future;
-
-    private ClientKeepalive clientKeepalive;
 
     public WebsocketClientInstance(WebsocketPushClient client){
         this.websocketPushClient = client;
@@ -48,18 +46,16 @@ public class WebsocketClientInstance implements ClientInstance {
             future = executorService.submit(new ClientWorkerThread(websocketPushClient));
             executorService.shutdown();
 
-
+        }else{
+            LogUtils.console_print("websocketPushClient is null");
         }
         
-        Boolean keepLiveFlag = websocketPushClient.getWebsocketConfig().getKeepAlive();
-        if ( keepLiveFlag != null && keepLiveFlag){
-                clientKeepalive = new ClientKeepalive();
-                clientKeepalive.setClientInstance(this);
-                clientKeepalive.watcher();
-        }
+
     }
 
-
+    /**
+     * close a connection manually
+     */
     public void closeConnection(){
 
         try{
@@ -69,27 +65,43 @@ public class WebsocketClientInstance implements ClientInstance {
                 WebsocketPushClient client = future.get();
 
                 if (client != null){
+
+                    //close auto reconnection
+                    client.getWebsocketConfig().setAutoRebootClient(false);
+
                     Channel ch = client.getChannel();
-                     
-                    ch.writeAndFlush(new CloseWebSocketFrame());
-                    ch.closeFuture().sync();
-                    ch.close();
-                    if (client.getGroupCopy() == null){
+                    if (ch != null){
+                        //send close frame to server initiatively
+                        ch.writeAndFlush(new CloseWebSocketFrame());
+                        ch.closeFuture().sync();
+                        ch.close();
+                    }
+
+                    //close event loop
+                    if (client.getGroupCopy() != null){
                     	client.getGroupCopy().shutdownGracefully();
+                    }else{
+                        ch.eventLoop().shutdownGracefully();
                     }
                 }
 
             }else{
-                throw new WebSocketClientException("Fail to get Websocket client.");
+                throw new WebSocketClientException("Fail to get Websocket client object. websocket client was in abnormal status");
             }
 
         }catch (Exception e){
             e.printStackTrace();
+            logger.error("Fail to shutdown client", e);
         }
 
 
     }
 
+    /**
+     * fetch the channel from connection
+     * @return
+     * @throws Exception
+     */
     public Channel getChannel() throws Exception{
 
         if (future != null && future.isDone()){
@@ -117,6 +129,10 @@ public class WebsocketClientInstance implements ClientInstance {
         this.websocketConfig = websocketConfig;
     }
 
+    /**
+     * indicating the status of channel
+     * @return
+     */
     public boolean isReady(){
         if (channel != null && channel.isActive()){
             return true;
