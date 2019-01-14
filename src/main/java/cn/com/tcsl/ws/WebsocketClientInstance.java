@@ -86,6 +86,10 @@ public class WebsocketClientInstance implements ClientInstance {
                 }
 
             }else{
+                if (websocketPushClient != null){
+                    websocketPushClient.getChannel().close().sync();
+                }
+
                 throw new WebSocketClientException("Fail to get Websocket client object. websocket client was in abnormal status");
             }
 

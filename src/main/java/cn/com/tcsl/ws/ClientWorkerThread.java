@@ -28,7 +28,6 @@ public class ClientWorkerThread implements Callable<WebsocketPushClient> {
             if ( keepLiveFlag != null && keepLiveFlag){
                 clientKeepalive = new ClientKeepalive(websocketPushClient);
                // clientKeepalive.setClientInstance(this);
-
                 clientKeepalive.watcher();
             }
 

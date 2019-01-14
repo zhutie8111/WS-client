@@ -1,30 +1,17 @@
 package cn.com.tcsl.ws;
 
+import cn.com.tcsl.ws.message.ReceiveMessage;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.buffer.ByteBuf;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelPromise;
-import io.netty.channel.SimpleChannelInboundHandler;
+import io.netty.channel.*;
 import io.netty.handler.codec.http.FullHttpResponse;
-import io.netty.handler.codec.http.websocketx.BinaryWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketClientHandshaker;
-import io.netty.handler.codec.http.websocketx.WebSocketFrame;
-import io.netty.handler.codec.http.websocketx.WebSocketHandshakeException;
+import io.netty.handler.codec.http.websocketx.*;
 import io.netty.util.CharsetUtil;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Created by Tony on 2018/11/3.
  */
 public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Object> {
-
-    private static Logger logger = LoggerFactory.getLogger(LogUtils.LOG_PROFILE_NAME);
 
     private final WebSocketClientHandshaker handshaker;
 
@@ -93,16 +80,19 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
             receiveMessage.onMessage(ch, textFrame.text());
 
         } else if (frame instanceof PongWebSocketFrame) {
-            System.out.println("WebSocket Client received pong");
+            LogUtils.console_print("WebSocket Client received pong");
 
             receiveMessage.onMessage(ch, frame);
 
         } else if (frame instanceof CloseWebSocketFrame) {
-            System.out.println("WebSocket Client received close Frame");
+            LogUtils.console_print("WebSocket Client received close Frame");
 
             receiveMessage.onMessage(ch, frame);//执行后将关闭
 
-            ch.close();
+            //receive a closing frame to shutdown the event loop
+            ch.eventLoop().shutdownGracefully();
+
+            ch.close().sync();
         }else if(frame instanceof  BinaryWebSocketFrame){
             BinaryWebSocketFrame binaryFrame = (BinaryWebSocketFrame)msg;
             ByteBuf buf = binaryFrame.content();
@@ -124,6 +114,7 @@ public class WebsocketPushClientHandler extends SimpleChannelInboundHandler<Obje
         if (!handshakeFuture.isDone()) {
             handshakeFuture.setFailure(cause);
         }
+        LogUtils.console_print("exceptionCaught "+ cause.getMessage());
         ctx.close();
     }
 }

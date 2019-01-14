@@ -1,6 +1,5 @@
 package cn.com.tcsl.ws.message;
 
-import cn.com.tcsl.ws.ReceiveMessage;
 import cn.com.tcsl.ws.utils.GZIPUtil;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;

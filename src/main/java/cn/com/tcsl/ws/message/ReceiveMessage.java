@@ -1,4 +1,4 @@
-package cn.com.tcsl.ws;
+package cn.com.tcsl.ws.message;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;

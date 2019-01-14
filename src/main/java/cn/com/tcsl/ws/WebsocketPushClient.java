@@ -1,5 +1,7 @@
 package cn.com.tcsl.ws;
 
+import cn.com.tcsl.ws.exception.WebSocketClientException;
+import cn.com.tcsl.ws.message.ReceiveMessage;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -114,6 +116,7 @@ public class WebsocketPushClient {
                                         new HttpClientCodec(),
                                         new HttpObjectAggregator(httpMaxContentLength),
                                         WebSocketClientCompressionHandler.INSTANCE,
+                                        //new LoggingHandler(LogLevel.INFO), // only for debug
                                         handler);
                             }
                         }).option(ChannelOption.SO_KEEPALIVE, true)
@@ -124,8 +127,11 @@ public class WebsocketPushClient {
                 ChannelFuture channelFuture = bootstrap.connect(uri.getHost(), port).sync();
                 channel = channelFuture.channel();
                 handler.handshakeFuture().sync();
-               
-                //ch.closeFuture().sync();
+
+                //channel.closeFuture().sync();
+            }catch (Exception e){
+                groupCopy.shutdownGracefully();
+                throw new WebSocketClientException("fail to establish a connection", e);
             }
             finally {
                // group.shutdownGracefully();
