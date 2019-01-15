@@ -25,6 +25,14 @@ public class WebsocketConfig {
 
     private Boolean keepAlive;
 
+    private Integer readerIdleTimeSeconds = 60;
+
+    private Integer writerIdleTimeSeconds = 60;
+
+    private Integer allIdleTimeSeconds = 120;
+
+    private Boolean needHeartBeat = Boolean.FALSE;
+
 
     public WebsocketConfig (){
     }
@@ -112,5 +120,37 @@ public class WebsocketConfig {
 
     public void setKeepAlive(Boolean keepAlive) {
         this.keepAlive = keepAlive;
+    }
+
+    public Integer getReaderIdleTimeSeconds() {
+        return readerIdleTimeSeconds;
+    }
+
+    public void setReaderIdleTimeSeconds(Integer readerIdleTimeSeconds) {
+        this.readerIdleTimeSeconds = readerIdleTimeSeconds;
+    }
+
+    public Integer getWriterIdleTimeSeconds() {
+        return writerIdleTimeSeconds;
+    }
+
+    public void setWriterIdleTimeSeconds(Integer writerIdleTimeSeconds) {
+        this.writerIdleTimeSeconds = writerIdleTimeSeconds;
+    }
+
+    public Integer getAllIdleTimeSeconds() {
+        return allIdleTimeSeconds;
+    }
+
+    public void setAllIdleTimeSeconds(Integer allIdleTimeSeconds) {
+        this.allIdleTimeSeconds = allIdleTimeSeconds;
+    }
+
+    public Boolean getNeedHeartBeat() {
+        return needHeartBeat;
+    }
+
+    public void setNeedHeartBeat(Boolean needHeartBeat) {
+        this.needHeartBeat = needHeartBeat;
     }
 }

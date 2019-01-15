@@ -2,6 +2,7 @@ package cn.com.tcsl.ws;
 
 import cn.com.tcsl.ws.exception.WebSocketClientException;
 import cn.com.tcsl.ws.message.ReceiveMessage;
+import cn.com.tcsl.ws.status.Heartbeat;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -16,6 +17,7 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.IdleStateHandler;
 
 import java.net.URI;
 import java.util.Map;
@@ -32,6 +34,8 @@ public class WebsocketPushClient {
     private WebsocketConfig websocketConfig;
 
     private ReceiveMessage receiveMessage;
+
+    private Heartbeat heartbeat;
 
     private Channel channel;
 
@@ -98,6 +102,10 @@ public class WebsocketPushClient {
                                 WebSocketClientHandshakerFactory.newHandshaker(
                                         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
+                handler.setWebsocketConfig(websocketConfig);
+
+                handler.setHeartbeat(heartbeat);
+
                 Bootstrap bootstrap = new Bootstrap();
 
                 groupCopy = group;
@@ -117,6 +125,9 @@ public class WebsocketPushClient {
                                         new HttpObjectAggregator(httpMaxContentLength),
                                         WebSocketClientCompressionHandler.INSTANCE,
                                         //new LoggingHandler(LogLevel.INFO), // only for debug
+                                        new IdleStateHandler(websocketConfig.getReaderIdleTimeSeconds(),
+                                                websocketConfig.getWriterIdleTimeSeconds(),
+                                                websocketConfig.getAllIdleTimeSeconds()),
                                         handler);
                             }
                         }).option(ChannelOption.SO_KEEPALIVE, true)
@@ -141,6 +152,9 @@ public class WebsocketPushClient {
 
     }
 
+    /**
+     * According to config to create url
+     */
     private void getUrl(){
 
         url = websocketConfig.getScheme() + "://" + websocketConfig.getHost()+":" + websocketConfig.getPort() + "/"
@@ -183,8 +197,15 @@ public class WebsocketPushClient {
         return channel;
     }
 
+    public Heartbeat getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(Heartbeat heartbeat) {
+        this.heartbeat = heartbeat;
+    }
+
     public EventLoopGroup getGroupCopy(){
         return groupCopy;
-
     }
 }

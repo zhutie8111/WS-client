@@ -13,25 +13,32 @@
     <name>websocket push client</name>
     <description>based on Netty io framework</description>
 
+    <properties>
+        <netty.version>4.1.29.Final</netty.version>
+        <slf4j.version>1.7.25</slf4j.version>
+        <junit.version>4.11</junit.version>
+    </properties>
+
+
     <dependencies>
         <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
         <dependency>
             <groupId>io.netty</groupId>
             <artifactId>netty-all</artifactId>
-            <version>4.1.29.Final</version>
+            <version>${netty.version}</version>
         </dependency>
 
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.11</version>
+            <version>${junit.version}</version>
             <scope>test</scope>
         </dependency>
 
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
-            <version>1.7.25</version>
+            <version>${slf4j.version}</version>
         </dependency>
 
     </dependencies>
@@ -43,7 +50,6 @@
                 <artifactId>maven-compiler-plugin</artifactId>
             </plugin>
         </plugins>
-
     </build>
 
 

@@ -1,5 +1,6 @@
 package cn.com.tcsl.ws.message;
 
+import cn.com.tcsl.ws.status.Heartbeat;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -9,12 +10,13 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 /**
+ *
+ * Basic implementation for sending message <br>
+ *
  * Created by Tony on 2018/11/7.
  *
- * Basic implementation for sending message
- *
  */
-public class PushMessage {
+public class PushMessage implements Heartbeat {
 
     private Channel channel;
 
@@ -97,10 +99,14 @@ public class PushMessage {
         }
     }
 
-
-
-
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    /**
+     * default heart beat implementation
+     */
+    public void pulse() {
+        ping();
     }
 }

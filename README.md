@@ -1,1 +1,2 @@
-# netty websocket client demo
+# websocket client based on Netty
+
