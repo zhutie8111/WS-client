@@ -1,11 +1,16 @@
 package cn.com.tcsl.ws;
 
+import cn.com.tcsl.ws.exception.WebSocketClientException;
 import cn.com.tcsl.ws.status.ClientKeepalive;
 
 import java.util.concurrent.Callable;
 
 /**
- * Created by Administrator on 2018/11/12.
+ * Asynchronously create a thread to start connecting client to server <br>
+ *     after connection the thread would return the client object.
+ *
+ * @author Tony zhu
+ * Created by zhu tie on 2018/11/12.
  */
 public class ClientWorkerThread implements Callable<WebsocketPushClient> {
 
@@ -33,7 +38,7 @@ public class ClientWorkerThread implements Callable<WebsocketPushClient> {
 
         }catch (Exception e){
             e.printStackTrace();
-           // throw new RuntimeException(e);
+            throw new WebSocketClientException(e);
         }
 
         return websocketPushClient;

@@ -11,6 +11,10 @@ public class WebSocketClientException extends RuntimeException{
 	public WebSocketClientException(String msg){
 		super(msg);
 	}
+
+	public WebSocketClientException(Throwable t){
+		super(t);
+	}
 	
 	public WebSocketClientException(String msg, Throwable e){
 		super(msg, e);

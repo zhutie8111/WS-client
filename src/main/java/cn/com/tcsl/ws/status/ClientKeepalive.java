@@ -12,8 +12,6 @@ import cn.com.tcsl.ws.WebsocketPushClient;
  */
 public class ClientKeepalive {
 
-    private Boolean enableKeepalive;
-
     private WebsocketPushClient websocketPushClient;
 
     ClientKeepalive(){}
@@ -26,7 +24,6 @@ public class ClientKeepalive {
      * Instance a watcher to look at the status of web socket client
      */
     public void watcher(){
-
         StatusInspector inspector = new StatusInspector(websocketPushClient);
         Thread thread = new Thread(inspector);
         thread.setName("StatusInspector-thread");
