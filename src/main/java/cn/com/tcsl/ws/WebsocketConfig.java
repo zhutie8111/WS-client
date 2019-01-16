@@ -29,7 +29,7 @@ public class WebsocketConfig {
 
     private Integer writerIdleTimeSeconds = 60;
 
-    private Integer allIdleTimeSeconds = 120;
+    private Integer allIdleTimeSeconds = 0;
 
     private Boolean needHeartBeat = Boolean.FALSE;
 

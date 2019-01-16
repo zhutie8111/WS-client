@@ -1,22 +1,27 @@
 package cn.com.tcsl.ws;
 
+import cn.com.tcsl.ws.message.PushMessage;
 import io.netty.channel.Channel;
 
 /**
+ * The interface of web socket client instance
+ *
  * Created by Tony on 2018/11/9.
  */
 public interface ClientInstance {
 
-    public void connect();
+    void connect();
 
-    public void closeConnection();
+    void closeConnection();
 
-    public Channel getChannel() throws Exception;
+    Channel getChannel() throws Exception;
 
-    public boolean isReady();
+    boolean isReady();
 
-    public WebsocketPushClient getWebsocketPushClient();
+    WebsocketPushClient getWebsocketPushClient();
 
-    public WebsocketConfig getWebsocketConfig();
+    WebsocketConfig getWebsocketConfig();
+
+    PushMessage PushMessage();
 
 }

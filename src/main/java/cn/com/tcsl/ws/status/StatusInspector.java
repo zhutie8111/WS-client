@@ -19,15 +19,14 @@ public class StatusInspector implements Runnable{
      */
     private ClientInstance clientInstance;
 
+    /**
+     * websocket client
+     */
     private WebsocketPushClient websocketPushClient;
 
     private boolean running = true;
 
     private long DEFAULT_CHECK_ALIVE_DURATION = 30;
-
-    public StatusInspector(ClientInstance clientInstance){
-        this.clientInstance = clientInstance;
-    }
 
     public StatusInspector(WebsocketPushClient client){
         websocketPushClient = client;
@@ -77,7 +76,9 @@ public class StatusInspector implements Runnable{
 
     }
 
-
+    /**
+     * set customized configuration
+     */
     protected void setCustomizedConfig(){
         if (clientInstance != null){
         	Long configCheckLiveDuration = clientInstance.getWebsocketPushClient().getWebsocketConfig().getCheckLiveDuration();
@@ -94,9 +95,11 @@ public class StatusInspector implements Runnable{
     }
 
 
-
-    public void setRunning(boolean running) {
-        this.running = running;
+    /**
+     * shut down inspector after thread wakeup and next running
+     */
+    public void shutdownInspectorGracefully(){
+        running = false;
     }
 
 

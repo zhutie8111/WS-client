@@ -1,6 +1,7 @@
 package cn.com.tcsl.ws;
 
 import cn.com.tcsl.ws.exception.WebSocketClientException;
+import cn.com.tcsl.ws.message.PushMessage;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -28,6 +29,9 @@ public class WebsocketClientInstance implements ClientInstance {
         this.websocketPushClient = client;
     }
 
+    private PushMessage pushMessage;
+
+
     /**
      * create a thread to start the websocket client
      * 
@@ -35,9 +39,6 @@ public class WebsocketClientInstance implements ClientInstance {
     public void connect(){
 
         if (this.websocketPushClient != null){
-
-            //websocketPushClient.setReceiveMessage(websocketPushClient.getReceiveMessage());
-           // websocketPushClient.setWebsocketConfig(websocketPushClient.getWebsocketConfig());
 
             ExecutorService executorService = new ThreadPoolExecutor(1, 1, 0L, TimeUnit.MILLISECONDS,
                     new LinkedBlockingQueue<Runnable>(1));
@@ -145,6 +146,18 @@ public class WebsocketClientInstance implements ClientInstance {
         }
     }
 
+    /**
+     * Fetch the object of sending message
+     *
+     * @return sending message object
+     */
+    public PushMessage PushMessage(){
+        if (pushMessage == null){
+            pushMessage = new PushMessage(websocketPushClient.getChannel());
+        }
+        return pushMessage;
+
+    }
 
 
 }
