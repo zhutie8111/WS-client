@@ -96,7 +96,7 @@ public class StatusInspector implements Runnable{
 
 
     /**
-     * shut down inspector after thread wakeup and next running
+     * shut down inspector gracefully after thread became wakeup and next running
      */
     public void shutdownInspectorGracefully(){
         running = false;

@@ -13,10 +13,13 @@ import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
  *
  * Basic implementation for sending message <br>
  *
+ * You can override the method for special procession <br>
+ *
+ *
  * Created by Tony on 2018/11/7.
  *
  */
-public class PushMessage implements Heartbeat {
+public class PushMessage implements Sender, Heartbeat {
 
     private Channel channel;
 

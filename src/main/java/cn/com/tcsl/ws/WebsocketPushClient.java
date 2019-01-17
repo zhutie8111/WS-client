@@ -1,6 +1,7 @@
 package cn.com.tcsl.ws;
 
 import cn.com.tcsl.ws.exception.WebSocketClientException;
+import cn.com.tcsl.ws.message.DefaultReceiveMessage;
 import cn.com.tcsl.ws.message.ReceiveMessage;
 import cn.com.tcsl.ws.status.Heartbeat;
 import io.netty.bootstrap.Bootstrap;
@@ -51,11 +52,11 @@ public class WebsocketPushClient {
         this.receiveMessage = new ReceiveMessage(){};
     }
 
-    public WebsocketPushClient(WebsocketConfig config, ReceiveMessage receiveMessage){
+    public WebsocketPushClient(WebsocketConfig config, ReceiveMessage callbackReceiver){
 
         this.websocketConfig = config;
 
-        this.receiveMessage = receiveMessage;
+        this.receiveMessage = callbackReceiver;
     }
 
     protected void connect() throws Exception{
@@ -90,6 +91,11 @@ public class WebsocketPushClient {
                 //sslCtx = SslContext.newClientContext(InsecureTrustManagerFactory.INSTANCE); //Only for 4.0.* version
             } else {
                 sslCtx = null;
+            }
+
+
+            if (receiveMessage != null && websocketConfig.getUseDefaultMessageReceiver()){
+                receiveMessage = new DefaultReceiveMessage();
             }
 
             EventLoopGroup group = new NioEventLoopGroup();

@@ -33,6 +33,8 @@ public class WebsocketConfig {
 
     private Boolean needHeartBeat = Boolean.FALSE;
 
+    private Boolean useDefaultMessageReceiver;
+
 
     public WebsocketConfig (){
     }
@@ -152,5 +154,13 @@ public class WebsocketConfig {
 
     public void setNeedHeartBeat(Boolean needHeartBeat) {
         this.needHeartBeat = needHeartBeat;
+    }
+
+    public Boolean getUseDefaultMessageReceiver() {
+        return useDefaultMessageReceiver;
+    }
+
+    public void setUseDefaultMessageReceiver(Boolean useDefaultMessageReceiver) {
+        this.useDefaultMessageReceiver = useDefaultMessageReceiver;
     }
 }

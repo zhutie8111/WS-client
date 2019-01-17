@@ -27,6 +27,7 @@ public class DefaultReceiveMessage extends ReceiveMessage {
             LogUtils.console_print("message: " + t);
         }catch (Exception e){
             e.printStackTrace();
+            LogUtils.console_print("Fail to process byte message");
         }
 
     }

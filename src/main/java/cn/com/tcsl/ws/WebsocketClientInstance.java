@@ -2,6 +2,7 @@ package cn.com.tcsl.ws;
 
 import cn.com.tcsl.ws.exception.WebSocketClientException;
 import cn.com.tcsl.ws.message.PushMessage;
+import cn.com.tcsl.ws.message.Sender;
 import cn.com.tcsl.ws.utils.LogUtils;
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.CloseWebSocketFrame;
@@ -29,7 +30,7 @@ public class WebsocketClientInstance implements ClientInstance {
         this.websocketPushClient = client;
     }
 
-    private PushMessage pushMessage;
+    private Sender sender;
 
 
     /**
@@ -127,12 +128,13 @@ public class WebsocketClientInstance implements ClientInstance {
     }
 
     public WebsocketConfig getWebsocketConfig() {
-        return websocketConfig;
+        return websocketPushClient.getWebsocketConfig();
+        //return websocketConfig;
     }
 
-    public void setWebsocketConfig(WebsocketConfig websocketConfig) {
+/*    public void setWebsocketConfig(WebsocketConfig websocketConfig) {
         this.websocketConfig = websocketConfig;
-    }
+    }*/
 
     /**
      * indicating the status of channel
@@ -151,11 +153,11 @@ public class WebsocketClientInstance implements ClientInstance {
      *
      * @return sending message object
      */
-    public PushMessage PushMessage(){
-        if (pushMessage == null){
-            pushMessage = new PushMessage(websocketPushClient.getChannel());
+    public Sender PushMessage(){
+        if (sender == null){
+            sender = new PushMessage(websocketPushClient.getChannel());
         }
-        return pushMessage;
+        return sender;
 
     }
 
