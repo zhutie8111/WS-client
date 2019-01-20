@@ -1,10 +1,10 @@
 # websocket client based on Netty
-Usage:
-new a basic web socket configuration
-new a web socket client object with configuration
-implement ReceiveMessage object
-instance interface ClientInstance with default implementation
-call connection
+Usage:<br>
+new a basic web socket configuration<br>
+new a web socket client object with configuration<br>
+implement ReceiveMessage object<br>
+instance interface ClientInstance with default implementation<br>
+call connection<br>
 
 
 
