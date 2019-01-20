@@ -1,9 +1,11 @@
-package cn.com.tcsl.ws;
+package cn.com.tcsl.ws.message;
 
 import io.netty.channel.Channel;
 import io.netty.handler.codec.http.websocketx.WebSocketFrame;
 
 /**
+ * Abstract class for receiving message implementation.<br>
+ *
  * Created by Tony on 2018/11/5.
  */
 public abstract class ReceiveMessage {

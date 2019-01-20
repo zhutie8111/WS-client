@@ -1,5 +1,6 @@
-package cn.com.tcsl.ws;
+package cn.com.tcsl.ws.message;
 
+import cn.com.tcsl.ws.status.Heartbeat;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -9,9 +10,16 @@ import io.netty.handler.codec.http.websocketx.PongWebSocketFrame;
 import io.netty.handler.codec.http.websocketx.TextWebSocketFrame;
 
 /**
+ *
+ * Basic implementation for sending message <br>
+ *
+ * You can override the method for special procession <br>
+ *
+ *
  * Created by Tony on 2018/11/7.
+ *
  */
-public class PushMessage {
+public class PushMessage implements Sender, Heartbeat {
 
     private Channel channel;
 
@@ -21,6 +29,15 @@ public class PushMessage {
         this.channel = channel;
     }
 
+    /**
+     * send a message
+     *
+     * @param object Three types of sending object <br>
+     *               1.String <br>
+     *               2.bytes array <br>
+     *               3.any objects
+     *
+     */
     public void send(Object object){
         if (channel != null ){
 
@@ -51,6 +68,9 @@ public class PushMessage {
 
     }
 
+    /**
+     * send a ping websocket frame to server
+     */
     public void ping(){
         if (channel != null){
             if (channel.isActive()){
@@ -65,6 +85,9 @@ public class PushMessage {
         }
     }
 
+    /**
+     * send a pong websocket frame to server
+     */
     public void pong(){
         if (channel != null){
             if (channel.isActive()){
@@ -79,10 +102,14 @@ public class PushMessage {
         }
     }
 
-
-
-
     public void setChannel(Channel channel) {
         this.channel = channel;
+    }
+
+    /**
+     * default heart beat implementation
+     */
+    public void pulse() {
+        ping();
     }
 }

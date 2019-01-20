@@ -1,15 +1,11 @@
 package cn.com.tcsl.ws;
 
-import java.net.URI;
-import java.util.Map;
-
+import cn.com.tcsl.ws.exception.WebSocketClientException;
+import cn.com.tcsl.ws.message.DefaultReceiveMessage;
+import cn.com.tcsl.ws.message.ReceiveMessage;
+import cn.com.tcsl.ws.status.Heartbeat;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
-import io.netty.channel.ChannelFuture;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.ChannelOption;
-import io.netty.channel.ChannelPipeline;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -22,6 +18,10 @@ import io.netty.handler.codec.http.websocketx.extensions.compression.WebSocketCl
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
 import io.netty.handler.ssl.util.InsecureTrustManagerFactory;
+import io.netty.handler.timeout.IdleStateHandler;
+
+import java.net.URI;
+import java.util.Map;
 
 /**
  * Created by Tony on 2018/11/3.
@@ -35,6 +35,8 @@ public class WebsocketPushClient {
     private WebsocketConfig websocketConfig;
 
     private ReceiveMessage receiveMessage;
+
+    private Heartbeat heartbeat;
 
     private Channel channel;
 
@@ -50,11 +52,11 @@ public class WebsocketPushClient {
         this.receiveMessage = new ReceiveMessage(){};
     }
 
-    public WebsocketPushClient(WebsocketConfig config, ReceiveMessage receiveMessage){
+    public WebsocketPushClient(WebsocketConfig config, ReceiveMessage callbackReceiver){
 
         this.websocketConfig = config;
 
-        this.receiveMessage = receiveMessage;
+        this.receiveMessage = callbackReceiver;
     }
 
     protected void connect() throws Exception{
@@ -91,6 +93,11 @@ public class WebsocketPushClient {
                 sslCtx = null;
             }
 
+
+            if (receiveMessage != null && websocketConfig.getUseDefaultMessageReceiver()){
+                receiveMessage = new DefaultReceiveMessage();
+            }
+
             EventLoopGroup group = new NioEventLoopGroup();
             try {
                 // Connect with V13 (RFC 6455 aka HyBi-17). You can change it to V08 or V00.
@@ -101,9 +108,15 @@ public class WebsocketPushClient {
                                 WebSocketClientHandshakerFactory.newHandshaker(
                                         uri, WebSocketVersion.V13, null, true, new DefaultHttpHeaders()), receiveMessage);
 
-                Bootstrap b = new Bootstrap();
-                
-                b.group(group)
+                handler.setWebsocketConfig(websocketConfig);
+
+                handler.setHeartbeat(heartbeat);
+
+                Bootstrap bootstrap = new Bootstrap();
+
+                groupCopy = group;
+
+                bootstrap.group(group)
                         .channel(NioSocketChannel.class)
                         .handler(new ChannelInitializer<SocketChannel>() {
                             @Override
@@ -117,6 +130,10 @@ public class WebsocketPushClient {
                                         new HttpClientCodec(),
                                         new HttpObjectAggregator(httpMaxContentLength),
                                         WebSocketClientCompressionHandler.INSTANCE,
+                                        //new LoggingHandler(LogLevel.INFO), // only for debug
+                                        new IdleStateHandler(websocketConfig.getReaderIdleTimeSeconds(),
+                                                websocketConfig.getWriterIdleTimeSeconds(),
+                                                websocketConfig.getAllIdleTimeSeconds()),
                                         handler);
                             }
                         }).option(ChannelOption.SO_KEEPALIVE, true)
@@ -124,13 +141,16 @@ public class WebsocketPushClient {
                 ;
 
                 //连接服务器
-                ChannelFuture channelFuture = b.connect(uri.getHost(), port).sync();
+                ChannelFuture channelFuture = bootstrap.connect(uri.getHost(), port).sync();
                 channel = channelFuture.channel();
                 handler.handshakeFuture().sync();
-               
-                //ch.closeFuture().sync();
-                groupCopy = group;
-            } finally {
+
+                //channel.closeFuture().sync();
+            }catch (Exception e){
+                groupCopy.shutdownGracefully();
+                throw new WebSocketClientException("fail to establish a connection", e);
+            }
+            finally {
                // group.shutdownGracefully();
 
             }
@@ -138,6 +158,9 @@ public class WebsocketPushClient {
 
     }
 
+    /**
+     * According to config to create url
+     */
     private void getUrl(){
 
         url = websocketConfig.getScheme() + "://" + websocketConfig.getHost()+":" + websocketConfig.getPort() + "/"
@@ -180,8 +203,15 @@ public class WebsocketPushClient {
         return channel;
     }
 
+    public Heartbeat getHeartbeat() {
+        return heartbeat;
+    }
+
+    public void setHeartbeat(Heartbeat heartbeat) {
+        this.heartbeat = heartbeat;
+    }
+
     public EventLoopGroup getGroupCopy(){
         return groupCopy;
-
     }
 }
