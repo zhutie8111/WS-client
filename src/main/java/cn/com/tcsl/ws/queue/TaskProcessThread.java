@@ -2,20 +2,20 @@ package cn.com.tcsl.ws.queue;
 
 public class TaskProcessThread implements Runnable{
 	
-	private TaskQueue tqueue;
-	
-	public TaskProcessThread(TaskQueue tq){
-		tqueue = tq;
-	}
 
 	public void run() {
-		
+
+		TaskQueue taskQueue = TaskQueue.getInstance();
+
 		while (true){
 			try {
-				MessageMission mm = tqueue.get().take();
-				mm.execute();
-			} catch (InterruptedException e) {
-				
+
+				MessageMission mm = taskQueue.get();
+				if (mm != null){
+					mm.execute();
+				}
+
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}

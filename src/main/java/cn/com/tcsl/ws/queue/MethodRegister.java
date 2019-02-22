@@ -10,8 +10,7 @@ public class MethodRegister {
 	public static void register(String methodName, MessageMission clazz){
 		map.put(methodName, clazz);
 	}
-	
-	
+
 	public static MessageMission get(String name){
 		return map.get(name);
 	}

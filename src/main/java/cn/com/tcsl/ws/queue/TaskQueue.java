@@ -1,29 +1,38 @@
 package cn.com.tcsl.ws.queue;
 
-import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class TaskQueue {
 	
-	private static TaskQueue tQueue;
+	private static TaskQueue self;
 	
-	private BlockingQueue<MessageMission> queue = new ArrayBlockingQueue<MessageMission>(200);
+	private BlockingQueue<MessageMission> blockingQueue = new LinkedBlockingQueue<MessageMission>();
 	
 	public synchronized static TaskQueue getInstance(){
-		if (tQueue == null){
-			tQueue = new TaskQueue();
-			TaskProcessThread taskProcessThread = new TaskProcessThread(tQueue);
+		if (self == null){
+			self = new TaskQueue();
+			TaskProcessThread taskProcessThread = new TaskProcessThread();
 			Thread t = new Thread(taskProcessThread);
+			t.setName("TaskProcessThread");
 			t.start();
 		}
 
-		return tQueue;
-	}
-	
-
-	public BlockingQueue<MessageMission> get(){
-		return queue;
+		return self;
 	}
 
+	public boolean add(MessageMission messageMission){
+		boolean success = blockingQueue.offer(messageMission);
+		return success;
+	}
+
+	public MessageMission get(){
+		try {
+			MessageMission messageMission = blockingQueue.take();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		return null;
+	}
 	
 }
