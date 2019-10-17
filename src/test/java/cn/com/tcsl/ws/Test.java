@@ -1,6 +1,7 @@
 package cn.com.tcsl.ws;
 
 import cn.com.tcsl.ws.message.DefaultReceiveMessage;
+import cn.com.tcsl.ws.message.PushMessage;
 
 import java.util.HashMap;
 import java.util.Map;

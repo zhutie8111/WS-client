@@ -21,7 +21,8 @@ public class LogUtils {
     public static void console_print(String content){
 
         if (console_print_flag){
-            System.out.println(yyyy_MM_dd_HH_mm_ss.format(System.currentTimeMillis()) +" "+ content);
+            String consoleLog = yyyy_MM_dd_HH_mm_ss.format(System.currentTimeMillis()) +" "+ content;
+            System.out.println(consoleLog);
         }else{
             logger.info(content);
         }
